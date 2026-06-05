@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>What to do now</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --bg: #080b0f;
+  --card: #0e1218;
+  --border: #1a2030;
+  --text: #dde4f0;
+  --muted: #4a5568;
+  --dim: #2a3444;
+
+  --prayer: #f0c060;
+  --ig: #ff4d8d;
+  --jp: #38bdf8;
+  --gym: #4ade80;
+  --quran: #fbbf24;
+  --rest: #a78bfa;
+  --sleep: #3a4a5a;
+  --post: #ff6b35;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'IBM Plex Sans', sans-serif;
+  overflow-x: hidden;
+}
+
+/* Subtle grid bg */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.app {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  padding: 24px 20px 40px;
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Clock bar */
+.clock-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.clock {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+}
+
+.date-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--dim);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* NOW card */
+.now-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.4s;
+}
+
+.now-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--current-color, var(--ig));
+  transition: background 0.4s;
+}
+
+.now-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.now-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2rem, 10vw, 3rem);
+  letter-spacing: 0.04em;
+  color: var(--current-color, var(--ig));
+  line-height: 1;
+  margin-bottom: 8px;
+  transition: color 0.4s;
+}
+
+.now-desc {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.now-meta {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.now-time {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--current-color, var(--ig));
+  font-weight: 600;
+  transition: color 0.4s;
+}
+
+.progress-wrap {
+  flex: 1;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: var(--current-color, var(--ig));
+  border-radius: 2px;
+  transition: width 1s linear, background 0.4s;
+}
+
+.time-left {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--dim);
+  white-space: nowrap;
+}
+
+/* NEXT card */
+.next-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.next-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--next-color, var(--prayer));
+  transition: background 0.4s;
+  box-shadow: 0 0 8px var(--next-color, var(--prayer));
+}
+
+.next-info { flex: 1; }
+
+.next-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 3px;
+}
+
+.next-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.next-time {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--next-color, var(--prayer));
+  transition: color 0.4s;
+}
+
+/* Schedule list */
+.schedule-wrap {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.schedule-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.schedule-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 16px;
+  border-bottom: 1px solid rgba(26,32,48,0.6);
+  transition: background 0.2s;
+}
+
+.schedule-item:last-child { border-bottom: none; }
+
+.schedule-item.active {
+  background: rgba(255,255,255,0.03);
+}
+
+.schedule-item.past {
+  opacity: 0.3;
+}
+
+.s-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.schedule-item.active .s-dot {
+  box-shadow: 0 0 6px currentColor;
+}
+
+.s-time {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  width: 52px;
+  flex-shrink: 0;
+}
+
+.s-title {
+  font-size: 12.5px;
+  color: var(--text);
+  flex: 1;
+}
+
+.schedule-item.active .s-title {
+  font-weight: 500;
+}
+
+.s-active-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--current-color, var(--ig));
+  background: rgba(255,77,141,0.1);
+  padding: 2px 7px;
+  border-radius: 3px;
+  display: none;
+}
+
+.schedule-item.active .s-active-tag {
+  display: block;
+}
+
+/* Motivational strip */
+.motive {
+  text-align: center;
+  font-size: 11px;
+  color: var(--dim);
+  letter-spacing: 0.06em;
+  font-family: 'IBM Plex Mono', monospace;
+  padding: 4px 0;
+}
+
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="clock-bar">
+    <div class="clock" id="clock">00:00:00</div>
+    <div class="date-label" id="dateLabel">—</div>
+  </div>
+
+  <div class="now-card" id="nowCard">
+    <div class="now-label">Right now</div>
+    <div class="now-title" id="nowTitle">Loading...</div>
+    <div class="now-desc" id="nowDesc"></div>
+    <div class="now-meta">
+      <div class="now-time" id="nowTime"></div>
+      <div class="progress-wrap">
+        <div class="progress-bar" id="progressBar" style="width:0%"></div>
+      </div>
+      <div class="time-left" id="timeLeft"></div>
+    </div>
+  </div>
+
+  <div class="next-card" id="nextCard">
+    <div class="next-dot" id="nextDot"></div>
+    <div class="next-info">
+      <div class="next-label">Coming up next</div>
+      <div class="next-title" id="nextTitle">—</div>
+    </div>
+    <div class="next-time" id="nextTime">—</div>
+  </div>
+
+  <div class="schedule-wrap">
+    <div class="schedule-header">Today's Schedule</div>
+    <div id="scheduleList"></div>
+  </div>
+
+  <div class="motive" id="motive"></div>
+
+</div>
+
+<script>
+const SCHEDULE = [
+  { time: "03:45", title: "Fajr",                  desc: "Wake up, make wudu, pray. Start the day right.",                                        cat: "prayer", color: "#f0c060" },
+  { time: "04:05", title: "Back to Sleep",          desc: "Sleep until 7 AM. You prayed — rest is halal.",                                         cat: "sleep",  color: "#3a4a5a" },
+  { time: "07:00", title: "Wake Up",                desc: "Freshen up. No scrolling. Meals come when they come — eat and keep going.",            cat: "rest",   color: "#a78bfa" },
+  { time: "07:45", title: "Quran + Reading",        desc: "Recite with meaning. Then 10–15 mins of a book that builds your mind.",                  cat: "quran",  color: "#fbbf24" },
+  { time: "08:15", title: "Gym",                    desc: "Morning session. Gets your energy up for the work ahead. Walk back, shower.",            cat: "gym",    color: "#4ade80" },
+  { time: "09:30", title: "Shower + Settle",        desc: "Post-gym reset. Sit down — work mode begins. Eat if food is ready.",                  cat: "rest",   color: "#a78bfa" },
+  { time: "10:00", title: "Instagram — Block 1",   desc: "Script, film, record voiceovers. One post start-to-finish. No multitasking.",            cat: "ig",     color: "#ff4d8d" },
+  { time: "12:00", title: "Dhuhr",                  desc: "Break the session. Pray, breathe, step away from the screen.",                          cat: "prayer", color: "#f0c060" },
+  
+  { time: "12:20", title: "Instagram — Block 2",   desc: "Edit, captions, hashtags, DM replies. Eat whenever food arrives — resume immediately.", cat: "ig",     color: "#ff4d8d" },
+  { time: "15:30", title: "Japanese Study",         desc: "Anki deck first, then guidetojapanese.org or JLPT Sensei. Every single day.",           cat: "jp",     color: "#38bdf8" },
+  { time: "16:34", title: "Asr",                    desc: "Pray on time. The afternoon prayer is easy to miss — don't.",                           cat: "prayer", color: "#f0c060" },
+  { time: "16:50", title: "Instagram — Block 3",   desc: "Final polish. ALL 4 posts must be 100% ready before 6:30 PM. Captions, covers, done.",  cat: "ig",     color: "#ff4d8d" },
+  { time: "18:38", title: "Maghrib",                desc: "Pray right at sunset. Clean slate before the posting window.",                           cat: "prayer", color: "#f0c060" },
+  { time: "18:55", title: "Pre-Post Prep",          desc: "First post at 7 PM sharp. Dinner comes whenever — you can eat and post at the same time.", cat: "rest",   color: "#a78bfa" },
+  { time: "19:00", title: "Post #1 → Live",         desc: "Upload post 1. Reply to early comments for 5 mins. Then close the app.",               cat: "post",   color: "#ff6b35" },
+  { time: "20:00", title: "Post #2 → Live",         desc: "Upload post 2. Engage briefly. Use the gap for Japanese review.",                       cat: "post",   color: "#ff6b35" },
+  { time: "20:15", title: "Isha",                   desc: "Perfect timing between Post 2 and Post 3. Pray, make dua, review the day.",             cat: "prayer", color: "#f0c060" },
+  { time: "20:35", title: "Japanese Review",        desc: "Light Anki or a short lesson. Just keep the streak alive.",                             cat: "jp",     color: "#38bdf8" },
+  { time: "21:00", title: "Post #3 → Live",         desc: "Upload post 3. Check how Post 1 performed. Note what's working.",                      cat: "post",   color: "#ff6b35" },
+  { time: "22:00", title: "Post #4 → Live",         desc: "Last post. Engage 10 mins then CLOSE the app. You're done for the day.",               cat: "post",   color: "#ff6b35" },
+  { time: "22:20", title: "Free Time",              desc: "GTA, YouTube, whatever. You earned it. Guilt-free.",                                    cat: "rest",   color: "#a78bfa" },
+  { time: "23:00", title: "Wind Down",              desc: "Dim screens. No new content. Be asleep by 11:30 PM.",                                   cat: "sleep",  color: "#3a4a5a" },
+  { time: "23:30", title: "Sleep",                  desc: "Lights out. Fajr is at 3:45 AM. Protect the sleep.",                                   cat: "sleep",  color: "#3a4a5a" },
+];
+
+const MOTIVES = [
+  "close the tab. open the editor.",
+  "the content won't make itself.",
+  "you already know what to do.",
+  "discipline > motivation every time.",
+  "一歩一歩 — one step at a time.",
+  "future you is watching.",
+  "not behind. just starting now.",
+  "the routine is the plan.",
+];
+
+function timeToMins(t) {
+  const [h, m] = t.split(":").map(Number);
+  return h * 60 + m;
+}
+
+function minsToStr(mins) {
+  const h = Math.floor(mins / 60) % 24;
+  const m = mins % 60;
+  const ampm = h >= 12 ? "PM" : "AM";
+  const hh = h % 12 || 12;
+  return `${hh}:${String(m).padStart(2,"0")} ${ampm}`;
+}
+
+function getNow() {
+  const now = new Date();
+  return now.getHours() * 60 + now.getMinutes();
+}
+
+function getCurrentBlock(nowMins) {
+  let current = 0;
+  for (let i = 0; i < SCHEDULE.length - 1; i++) {
+    if (nowMins >= timeToMins(SCHEDULE[i].time) && nowMins < timeToMins(SCHEDULE[i+1].time)) {
+      current = i;
+      break;
+    }
+    // Handle midnight wrap
+    if (i === SCHEDULE.length - 2) current = SCHEDULE.length - 1;
+  }
+  // Late night before Fajr
+  if (nowMins < timeToMins(SCHEDULE[0].time)) current = SCHEDULE.length - 1;
+  return current;
+}
+
+function formatTimeLeft(mins) {
+  if (mins <= 0) return "ending";
+  if (mins < 60) return `${mins}m left`;
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return m > 0 ? `${h}h ${m}m` : `${h}h left`;
+}
+
+function tick() {
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2,"0");
+  const mins  = String(now.getMinutes()).padStart(2,"0");
+  const secs  = String(now.getSeconds()).padStart(2,"0");
+  document.getElementById("clock").textContent = `${hours}:${mins}:${secs}`;
+
+  const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  document.getElementById("dateLabel").textContent =
+    `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}`;
+
+  const nowMins = now.getHours() * 60 + now.getMinutes();
+  const idx = getCurrentBlock(nowMins);
+  const block = SCHEDULE[idx];
+  const nextBlock = SCHEDULE[(idx + 1) % SCHEDULE.length];
+
+  // Set CSS var for color
+  document.documentElement.style.setProperty("--current-color", block.color);
+  document.documentElement.style.setProperty("--next-color", nextBlock.color);
+
+  // NOW card
+  document.getElementById("nowTitle").textContent = block.title;
+  document.getElementById("nowDesc").textContent = block.desc;
+  document.getElementById("nowTime").textContent = minsToStr(timeToMins(block.time));
+
+  // Progress
+  const blockStart = timeToMins(block.time);
+  const blockEnd = timeToMins(nextBlock.time);
+  const duration = blockEnd > blockStart ? blockEnd - blockStart : (24*60 - blockStart + blockEnd);
+  const elapsed = nowMins >= blockStart ? nowMins - blockStart : (24*60 - blockStart + nowMins);
+  const pct = Math.min(100, Math.round((elapsed / duration) * 100));
+  document.getElementById("progressBar").style.width = pct + "%";
+
+  const remaining = duration - elapsed;
+  document.getElementById("timeLeft").textContent = formatTimeLeft(remaining);
+
+  // NEXT card
+  document.getElementById("nextTitle").textContent = nextBlock.title;
+  document.getElementById("nextTime").textContent = minsToStr(timeToMins(nextBlock.time));
+
+  // Schedule list
+  const list = document.getElementById("scheduleList");
+  list.innerHTML = "";
+  SCHEDULE.forEach((item, i) => {
+    const div = document.createElement("div");
+    div.className = "schedule-item" + (i === idx ? " active" : (i < idx ? " past" : ""));
+    div.innerHTML = `
+      <div class="s-dot" style="background:${item.color}; color:${item.color}"></div>
+      <div class="s-time">${minsToStr(timeToMins(item.time))}</div>
+      <div class="s-title">${item.title}</div>
+      <div class="s-active-tag" style="background:${item.color}22; color:${item.color}">NOW</div>
+    `;
+    list.appendChild(div);
+  });
+
+  // Motivational strip
+  const motiveIdx = Math.floor(now.getMinutes() / 7) % MOTIVES.length;
+  document.getElementById("motive").textContent = MOTIVES[motiveIdx];
+}
+
+tick();
+setInterval(tick, 1000);
+</script>
+</body>
+</html>
